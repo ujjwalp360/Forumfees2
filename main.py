@@ -44,7 +44,7 @@ def delete_row_by_roll_no(roll_no):
     roll_no = roll_no.strip()  # Trim any leading/trailing spaces
 
     # Ensure roll number is treated as a string
-    df['Roll No'] = df['Roll No'].astype(str)
+    df['Roll No'] = df['Roll No']
 
     # Check if the roll number exists
     if roll_no in df['Roll No'].values:
