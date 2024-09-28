@@ -64,20 +64,24 @@ def delete_row_by_roll_no(roll_no):
         st.error(f"Roll No {roll_no} not found.")
 
 # Streamlit app for collecting student data
-st.title("College Fee Collection")
+st.title("Forum Fees collection")
 
 ensure_csv()  # Ensure the CSV file is ready
 
 # Form to input new student data
 with st.form("entry_form"):
     name = st.text_input("Enter Name")
-    roll_no = st.text_input("Enter Roll No")
+    roll_no = st.text_input("Enter Roll No (mandatory)",max_chars=4)  # Mandatory field
     amount = st.number_input("Enter Amount", value=250)
 
     submit = st.form_submit_button("Submit")
 
     if submit:
-        append_data(roll_no, name, amount)
+        # Check if Roll No is provided
+        if roll_no.strip() == "":
+            st.error("Roll No is mandatory. Please enter a valid Roll No.")
+        else:
+            append_data(roll_no, name, amount)
 
 # Show the list of data
 if st.button("Show List"):
@@ -85,11 +89,14 @@ if st.button("Show List"):
     if not df.empty:
         df_sorted = df.sort_values(by='Roll No').reset_index(drop=True)  # Reset index for clean display
         df_sorted.index += 1 #to show index 1
-        st.write(df_sorted)
+        st.write(df_sorted.astype(str))
         
         # Calculate and display total amount
         total_amount = df['Amount'].sum()
-        st.write(f"**Total Amount Collected:** ₹{total_amount}")
+        st.write(f"**Amount Collected:** ₹{total_amount}")
+        st.write(f"**Amount left:** ₹{(13000-total_amount)}")
+        st.write(f"**Total Amount to collect:** ₹{13000}")
+        st.write(f"**No. of student left:** {(13000-total_amount)//250}")
     else:
         st.write("No data available.")
 
