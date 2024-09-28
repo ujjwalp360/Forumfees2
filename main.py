@@ -26,7 +26,7 @@ def append_data(roll_no, name, amount):
     df = load_data()
 
     # Check if the roll number already exists
-    if roll_no in df['Roll No'].astype(str).values:
+    if roll_no and roll_no in df['Roll No'].astype(str).values:
         st.error(f"Roll No {roll_no} already exists. Please use a different roll number.")
         return
 
@@ -38,30 +38,29 @@ def append_data(roll_no, name, amount):
 
     st.success("Data submitted successfully!")
 
-# Delete a row by roll number from the CSV
-def delete_row_by_roll_no(roll_no):
+# Delete a row by name from the CSV
+def delete_row_by_name(name):
     df = load_data()  # Load the current data
-    roll_no = roll_no.strip()  # Trim any leading/trailing spaces
+    name = name.strip()  # Trim any leading/trailing spaces
 
-    # Ensure roll number is treated as a string
-    df['Roll No'] = df['Roll No']
-
-    # Check if the roll number exists
-    if roll_no in df['Roll No'].values:
-        # Remove the row with the given roll number
-        df = df[df['Roll No'] != roll_no]
+    # Check if the name exists
+    if name in df['Name'].values:
+        # Remove the row with the given name
+        df = df[df['Name'] != name]
         df.to_csv(CSV_FILE, index=False)  # Save the updated DataFrame back to CSV
-        st.success(f"Roll No {roll_no} deleted successfully!")
+        st.success(f"Entry for {name} deleted successfully!")
         
         # Display the updated list automatically after deletion
         st.write("Updated List After Deletion:")
-        st.write(df)
+        df = df.reset_index(drop=True)  # Reset the index
+        df.index += 1  # Start the index from 1
+        st.write(df.astype(str))  # Ensure all data is displayed as string to avoid formatting issues
         
         # Show the total amount after deletion
         total_amount = df['Amount'].sum()
         st.write(f"**Total Amount Collected After Deletion:** ₹{total_amount}")
     else:
-        st.error(f"Roll No {roll_no} not found.")
+        st.error(f"No entry found for {name}.")
 
 # Streamlit app for collecting student data
 st.title("College Fee Collection")
@@ -84,8 +83,8 @@ if st.button("Show List"):
     df = load_data()  # Load the data again when the button is pressed
     if not df.empty:
         df_sorted = df.sort_values(by='Roll No').reset_index(drop=True)  # Reset index for clean display
-        df_sorted.index += 1 #to show index 1
-        st.write(df_sorted)
+        df_sorted.index += 1  # Start the index from 1 instead of 0
+        st.write(df_sorted.astype(str))  # Ensure all data is displayed as string to avoid formatting issues
         
         # Calculate and display total amount
         total_amount = df['Amount'].sum()
@@ -93,10 +92,10 @@ if st.button("Show List"):
     else:
         st.write("No data available.")
 
-# Option to delete a row by roll number
+# Option to delete a row by name
 with st.form("delete_form"):
-    delete_roll_no = st.text_input("Enter the Roll No to delete")
+    delete_name = st.text_input("Enter the Name to delete")
     delete_submit = st.form_submit_button("Delete")
 
     if delete_submit:
-        delete_row_by_roll_no(delete_roll_no)
+        delete_row_by_name(delete_name)
